@@ -1,7 +1,7 @@
 package main
 
 import (
-    // "fmt"
+    "fmt"
 	"image"
 	"image/color"
 	"image/gif"
@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
     "strconv"
+    "net/url"
 	// "os"
 	// "time"
 )
@@ -32,28 +33,22 @@ var clrLineIdx = []uint8{1, 2, 3, 4, 5, 6, 7}
 
 func main() {
 	http.HandleFunc("/", handler)
+    http.HandleFunc("/test", handlerPrintParam)
+
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
     log.Println(r.URL)
-    p := defaultLParam()
     r.ParseForm()
-    for k, v := range r.Form {
-        switch k {
-        case "cycles":
-            p.cycles, _ = strconv.Atoi(v[0])
-        case "size":
-            p.size, _ = strconv.Atoi(v[0])
-        case "nframes":
-            p.nframes, _ = strconv.Atoi(v[0])
-        case "delay":
-            p.delay, _ = strconv.Atoi(v[0])
-        case "res":
-            p.res, _ = strconv.ParseFloat(v[0], 64)
-        }
-    }
-    lissajous(w, p)
+    lparam := createLParamFromForm(r.Form)
+    lissajous(w, lparam)
+}
+
+func handlerPrintParam(w http.ResponseWriter, r *http.Request) {
+    r.ParseForm()
+    lparam := createLParamFromForm(r.Form)
+    fmt.Fprintf(w, "%v", lparam)
 }
 
 ///////////////////////////////////////////////
@@ -70,6 +65,24 @@ func defaultLParam() LissajousParam {
     return LissajousParam{
         5, 100, 64, 8, 0.001,
     }
+}
+func createLParamFromForm(form url.Values) LissajousParam{
+    p := defaultLParam()
+    for k, v := range form {
+        switch k {
+        case "cycles":
+            p.cycles, _ = strconv.Atoi(v[0])
+        case "size":
+            p.size, _ = strconv.Atoi(v[0])
+        case "nframes":
+            p.nframes, _ = strconv.Atoi(v[0])
+        case "delay":
+            p.delay, _ = strconv.Atoi(v[0])
+        case "res":
+            p.res, _ = strconv.ParseFloat(v[0], 64)
+        }
+    }
+    return p
 }
 
 func lissajous(out io.Writer, p LissajousParam) {

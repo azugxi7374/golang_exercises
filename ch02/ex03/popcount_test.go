@@ -2,7 +2,12 @@ package popcount
 
 import (
     "testing"
+    "math/rand"
 )
+
+func rand64() uint64 {
+    return uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
+}
 
 // PopCount0, PopCount1 が正しい
 func TestPopCount(t *testing.T){
@@ -32,15 +37,11 @@ const B_MAX = 65536
 
 func BenchmarkPopCount0(b *testing.B){
     for t:=0; t<b.N; t++ {
-        for i:=uint64(0); i<B_MAX; i++ {
-            PopCount0(i)
-        }
+        PopCount0(rand64())
     }
 }
 func BenchmarkPopCount1(b *testing.B){
     for t:=0; t<b.N; t++ {
-        for i:=uint64(0); i<B_MAX; i++ {
-            PopCount1(i)
-        }
+        PopCount1(rand64())
     }
 }

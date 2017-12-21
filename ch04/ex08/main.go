@@ -44,7 +44,6 @@ func charcount() map[string]int {
 		for _, ctg := range categories {
 			if ctg.f(r) {
 				cnt[ctg.name]++
-				break
 			}
 		}
 	}
